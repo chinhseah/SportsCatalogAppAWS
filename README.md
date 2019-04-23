@@ -91,3 +91,19 @@ On my local machine, I checked login to Amazon Lightsail using:
 ssh -i grader-keypair.pem grader@35.166.162.17 -p 2200
 ```
 ___resource___: [How do I add new user accounts with SSH access to my Amazon EC2 Linux instance?](https://aws.amazon.com/premiumsupport/knowledge-center/new-user-accounts-linux-instance/)
+### Step 6 - Set up Environment
+Set up necessary packages to run my web application like Apache server, Python, Flask, WSGI (Web Server Gateway Interface)
+```linux
+$ sudo apt-get update
+$ sudo apt-get install python-pip
+$ sudo apt-get install python-flask 
+$ sudo apt-get install python-alchemy
+$ sudo apt-get install apache2
+$ sudo apt-get install libapache2-mod-wsgi
+```
+After running all these, I went to my public IP listed above in a browser and check that I get “Apache2 Ubuntu Default Page”.
+Next check timezone is already set to UTC:
+```linux
+$ sudo dpkg-reconfigure tzdata
+```
+___resource___: [Deploying a Flask App Using Lightsail on Amazon Web Services](https://alonavarshal.com/blog/flask-on-lightsail-aws/)

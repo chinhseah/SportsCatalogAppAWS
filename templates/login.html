@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+
+  <title>Catalog App - Login</title>
+
+  <!--LOAD PRE-REQUISITES FOR GOOGLE SIGN IN -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="https://apis.google.com/js/platform.js?onload=start"></script>
+  <!--meta name="google-signin-client_id" content="267580499642-noama7ovlivecn8l8j46n2494otpa51m.apps.googleusercontent.com"-->
+  <script>
+      gapi.load('auth2', function() {
+        auth2 = gapi.auth2.init({
+          client_id: '267580499642-noama7ovlivecn8l8j46n2494otpa51m.apps.googleusercontent.com',
+          // Scopes to request in addition to 'profile' and 'email'
+          //scope: 'additional_scope'
+        });
+      });
+  </script>
+<!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
+</head>
+
+
+<body>
+  <header class="site-header">
+    <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+      <div class="container">
+        <a class="navbar-brand mr-4" href="/">Catalog App</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarToggle">
+          <div class="navbar-nav mr-auto">
+            <a class="nav-item nav-link" href="/">Home</a>
+          </div>
+          <!-- Navbar Right Side -->
+          <div class="navbar-nav navbar-right">
+            {%if 'username' not in session %}
+            <a class="nav-item nav-link" href="{{url_for('showLogin')}}">Login</a>
+            {% else %}
+            <a class="nav-item nav-link" href="{{url_for('disconnect')}}">Logout</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main role="main" class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="content-section">
+          <h2>Please Sign In With:</h2>
+          <div class="auth-provider">
+            Google: &nbsp;&nbsp;
+            <button class="g-signin2" id="signinButton">Sign in with Google</button>
+          </div>
+          <div id="result"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Optional JavaScript -->
+
+<!-- GOOGLE SIGN IN-->
+<script>
+  $('#signinButton').click(function() {
+    function signInCallback(authResult){
+      if (authResult['code']){
+        //$('#signinButton').attr('style', 'display: none');
+        $.ajax({
+          type: 'POST',
+          url: '/gconnect?state={{STATE}}',
+          headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+          },
+          contentType: 'application/octet-stream; charset=utf-8',
+          success:function(result){
+            $('#result').html('Login Successful!</br>'+ result + '</br>Redirecting...')
+                 setTimeout(function() {
+                  window.location.href = "/";
+                 }, 2000);
+          },
+          processData:false,
+          data:authResult['code']
+        });
+      } else{
+        // handle error
+        console.log('There was an error: ' + authResult['error']);
+        $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+
+      }
+    }
+    auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
+  });
+</script>
+
+<!--END GOOGLE SIGN IN -->
+</body>
+
+</html>
