@@ -9,7 +9,7 @@ IP Address: 35.166.162.17
 
 PORT: 2200
 
-SSH Key: Private key provided in "Notes to Reviewer" section upon project submission.
+SSH Key: Private key for 'grader' user provided in "Notes to Reviewer" section upon project submission.
 
 ### Step 2 - Update Instance
 Used following Linux commands to update currently installed packages:
@@ -96,10 +96,11 @@ Set up necessary packages to run my web application like Apache server, Python, 
 ```linux
 $ sudo apt-get update
 $ sudo apt-get install python-pip
-$ sudo apt-get install python-flask 
-$ sudo apt-get install python-alchemy
+$ sudo apt-get install python3-flask 
+$ sudo apt-get install python3-alchemy
 $ sudo apt-get install apache2
 $ sudo apt-get install libapache2-mod-wsgi
+$ sudo apt-get install python3-psycopg2
 ```
 After running all these, I went to my public IP listed above in a browser and check that I get “Apache2 Ubuntu Default Page”.
 Next check timezone is already set to UTC:
@@ -107,3 +108,31 @@ Next check timezone is already set to UTC:
 $ sudo dpkg-reconfigure tzdata
 ```
 ___resource___: [Deploying a Flask App Using Lightsail on Amazon Web Services](https://alonavarshal.com/blog/flask-on-lightsail-aws/)
+### Step 7 - Set up application files
+Set up my application files from GitHub
+```linux
+$ cd /var/www
+$ sudo chown -R ubuntu /var/www
+$ git clone https://github.com/chinhseah/SportsCatalogAppAWS.git
+```
+Check that files are in the /var/www/SportsCatalogAppAWS folder.
+### Step 8 - Set up Postgres database with Data
+```linux
+$ sudo apt-get update
+$ sudo apt-get install postgresql postgresql-contrib
+```
+Login to create 'catalog' database and set permissions:
+```linux
+$ sudo su postgres
+$ psql
+postgres=# CREATE USER catalog WITH PASSWORD 'catalog';
+postgres=# \du 
+postgres=# ALTER USER catalog WITH SUPERUSER;
+postgres=# CREATE DATABASE catalog;
+postgres=# GRANT ALL PRIVILEGES ON DATABASE catalog TO catalog;
+```
+Set up database table using database_setup.sql and populate catalog database with initial data:
+```linux
+$ python3 data_setup.py
+```
+___resource___: [How to Install and configuration PostgreSQL on Ubuntu Linux](https://youtu.be/-LwI4HMR_Eg)

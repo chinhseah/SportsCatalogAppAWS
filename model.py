@@ -12,7 +12,7 @@ Base = declarative_base()
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = 'catalog_user'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
@@ -49,7 +49,7 @@ class CategoryItem(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
     description = Column(String(250))
-    user_id = Column(Integer, ForeignKey('user.id'), default=1)
+    user_id = Column(Integer, ForeignKey('catalog_user.id'), default=1)
     category_id = Column(Integer, ForeignKey('category.id'), default=1)
     create_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     category = relationship(Category, cascade="all")
@@ -84,6 +84,6 @@ class CatItem():
             'category': self.category,
         }
 
-engine = create_engine('sqlite:///catalog.db')
+engine = create_engine('postgresql://catalog:catalog@localhost/catalog')
 
 Base.metadata.create_all(engine)
