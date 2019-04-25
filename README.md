@@ -10,6 +10,7 @@ IP Address: 35.166.162.17
 PORT: 2200
 
 SSH Key: Private key for 'grader' user provided in "Notes to Reviewer" section upon project submission.
+
 ___resource___: [Amazon Lightsail Documentation](https://aws.amazon.com/documentation/lightsail/)
 ### Step 2 - Update Instance
 Used following Linux commands to update currently installed packages:
@@ -117,7 +118,7 @@ $ mv SportsCatalogAppAWS catalog
 $ cd catalog
 $ mv application.py catalog.py
 ```
-Check that files are in the /var/www/SportsCatalogAppAWS folder.
+Check that files are in the /var/www/catalog folder.
 ### Step 8 - Set up Postgres database with Data
 ```linux
 $ sudo apt-get update
@@ -133,18 +134,18 @@ postgres=# ALTER USER catalog WITH SUPERUSER;
 postgres=# CREATE DATABASE catalog;
 postgres=# GRANT ALL PRIVILEGES ON DATABASE catalog TO catalog;
 ```
-In catalog.py and model.py files, modified connection to database:
+In catalog.py, model.py & data_setup.py files, modified connection to database:
 ```python
 create_engine('postgresql://catalog:catalog@localhost/catalog')
 ```
-Set up database table using database_setup.sql and populate catalog database with initial data:
+Set up database table using database_setup.sql and populate 'catalog' database with initial data:
 ```linux
 $ python3 data_setup.py
 ```
 ___resource___: [How to Install and configuration PostgreSQL on Ubuntu Linux](https://youtu.be/-LwI4HMR_Eg)
 ### Step 9 Deploy application
 Switch Apache2 to run my web application instead of the Ubuntu Default Page.
-1. I created a .wsgi file which serves the Flask app in /var/www/catalog
+1. Created a .wsgi file which serves the Flask app in /var/www/catalog
 ```linux
 $ nano catalog.wsgi
 ```
@@ -157,6 +158,7 @@ sys.path.insert(0, "/var/www/catalog/")
 from catalog import app as application
 ```
 Ctrl-X and enter Y to exit and save this file in /var/www/catalog/ folder.
+
 2. Next was the creation of an Apache configuration file.
 ```linux
 $ cd /etc/apache2/sites-available
@@ -186,22 +188,30 @@ Inserted following within catalog.conf file:
 </VirtualHost>
 ```
 Ctrl-X and enter Y to exit and save this file in /etc/apache2/sites-available/ folder.
+
 3. Disable apache2 from using default configuration and enable catalog configuration.
+
 Within /etc/apache2/sites-available folder:
 ```linux
 $ sudo a2dissite 000-default.conf
 $ sudo a2ensite catalog.conf
 ```
+
 4. Restart the apache2 server
 ```linux
 $ sudo service apache2 reload
 ```
+
 5. Set up Google login authorization
+
 Using Google Developer Console, the allowed domain (xip.io), added Authorized JavaScript origins and Authorized redirect URIs.
+
 6. Test out my application
+
 Before I started testing out how my app was running, I used following to monitor for errors:
 ```linux
 $ sudo tail -f /var/log/apach2/error.log
 ```
 Check out catalog app at http://35.166.162.17.xip.io
+
 ___resource___: [Deploying a Flask App Using Lightsail on Amazon Web Services](https://alonavarshal.com/blog/flask-on-lightsail-aws/)
