@@ -10,7 +10,7 @@ IP Address: 35.166.162.17
 PORT: 2200
 
 SSH Key: Private key for 'grader' user provided in "Notes to Reviewer" section upon project submission.
-
+___resource___: [Amazon Lightsail Documentation](https://aws.amazon.com/documentation/lightsail/)
 ### Step 2 - Update Instance
 Used following Linux commands to update currently installed packages:
 ```linux
@@ -25,7 +25,7 @@ Edited ssh configuration file to change port number from 22 to 2200 using:
 ```linux 
 $ sudo nano /etc/ssh/sshd_config
 ```
-___resource___: [Amazon Lightsail Documentation](https://aws.amazon.com/documentation/lightsail/)
+___resource___: [Linux Commands Cheat Sheet](https://www.linuxtrainingacademy.com/linux-commands-cheat-sheet/)
 ### Step 4 - Configure Firewall
 Configure using ufw (Uncomplicated Firewall) to change firewall rules:
 First Check firewall status
@@ -102,18 +102,20 @@ $ sudo apt-get install apache2
 $ sudo apt-get install libapache2-mod-wsgi
 $ sudo apt-get install python3-psycopg2
 ```
-After running all these, I went to my public IP listed above in a browser and check that I get “Apache2 Ubuntu Default Page”.
+After running all these, I went to my public IP listed above in a browser and check that I got “Apache2 Ubuntu Default Page”.
 Next check timezone is already set to UTC:
 ```linux
 $ sudo dpkg-reconfigure tzdata
 ```
-___resource___: [Deploying a Flask App Using Lightsail on Amazon Web Services](https://alonavarshal.com/blog/flask-on-lightsail-aws/)
 ### Step 7 - Set up application files
-Set up my application files from GitHub
+Set up my application files from GitHub. I changed folder and application.py to 'catalog'.
 ```linux
 $ cd /var/www
 $ sudo chown -R ubuntu /var/www
 $ git clone https://github.com/chinhseah/SportsCatalogAppAWS.git
+$ mv SportsCatalogAppAWS catalog
+$ cd catalog
+$ mv application.py catalog.py
 ```
 Check that files are in the /var/www/SportsCatalogAppAWS folder.
 ### Step 8 - Set up Postgres database with Data
@@ -131,8 +133,75 @@ postgres=# ALTER USER catalog WITH SUPERUSER;
 postgres=# CREATE DATABASE catalog;
 postgres=# GRANT ALL PRIVILEGES ON DATABASE catalog TO catalog;
 ```
+In catalog.py and model.py files, modified connection to database:
+```python
+create_engine('postgresql://catalog:catalog@localhost/catalog')
+```
 Set up database table using database_setup.sql and populate catalog database with initial data:
 ```linux
 $ python3 data_setup.py
 ```
 ___resource___: [How to Install and configuration PostgreSQL on Ubuntu Linux](https://youtu.be/-LwI4HMR_Eg)
+### Step 9 Deploy application
+Switch Apache2 to run my web application instead of the Ubuntu Default Page.
+1. I created a .wsgi file which serves the Flask app in /var/www/catalog
+```linux
+$ nano catalog.wsgi
+```
+Inserted following within catalog.wsgi file:
+```
+import sys
+import logging
+logging.basicConfig(stream=sys.stderr)
+sys.path.insert(0, "/var/www/catalog/")
+from catalog import app as application
+```
+Ctrl-X and enter Y to exit and save this file in /var/www/catalog/ folder.
+2. Next was the creation of an Apache configuration file.
+```linux
+$ cd /etc/apache2/sites-available
+$ nano catalog.conf
+```
+Inserted following within catalog.conf file:
+```
+<VirtualHost *:80>
+	ServerName 35.166.162.17
+	ServerAlias 35.166.162.17.xip.io
+	ServerAdmin ubuntu@35.166.162.17
+	WSGIDaemonProcess catalog python-path=/var/www/catalog
+	WSGIProcessGroup catalog
+	WSGIScriptAlias / /var/www/catalog/catalog.wsgi
+	<Directory /var/www/catalog/>
+		Order allow,deny
+		Allow from all
+	</Directory>
+	Alias /static /var/www/catalog/static
+	<Directory /var/www/catalog/static/>
+		Order allow,deny
+		Allow from all
+	</Directory>
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	LogLevel warn
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+Ctrl-X and enter Y to exit and save this file in /etc/apache2/sites-available/ folder.
+3. Disable apache2 from using default configuration and enable catalog configuration.
+Within /etc/apache2/sites-available folder:
+```linux
+$ sudo a2dissite 000-default.conf
+$ sudo a2ensite catalog.conf
+```
+4. Restart the apache2 server
+```linux
+$ sudo service apache2 reload
+```
+5. Set up Google login authorization
+Using Google Developer Console, the allowed domain (xip.io), added Authorized JavaScript origins and Authorized redirect URIs.
+6. Test out my application
+Before I started testing out how my app was running, I used following to monitor for errors:
+```linux
+$ sudo tail -f /var/log/apach2/error.log
+```
+Check out catalog app at http://35.166.162.17.xip.io
+___resource___: [Deploying a Flask App Using Lightsail on Amazon Web Services](https://alonavarshal.com/blog/flask-on-lightsail-aws/)
