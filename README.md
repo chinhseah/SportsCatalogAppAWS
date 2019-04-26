@@ -26,6 +26,10 @@ Edited ssh configuration file to change port number from 22 to 2200 using:
 ```linux 
 $ sudo nano /etc/ssh/sshd_config
 ```
+Changed root configuration from PermitRootLogin prohibit-password to:
+```
+PermitRootLogin no
+```
 ___resource___: [Linux Commands Cheat Sheet](https://www.linuxtrainingacademy.com/linux-commands-cheat-sheet/)
 ### Step 4 - Configure Firewall
 Configure using ufw (Uncomplicated Firewall) to change firewall rules:
@@ -40,7 +44,6 @@ $ sudo ufw allow outgoing
 ```
 Then allow for SSH on port 2200, HTTP on port 80, and NTP on port 123:
 ```linux
-$ sudo ufw allow ssh
 $ sudo ufw allow 2200/tcp
 $ sudo ufw allow http
 $ sudo ufw allow https
