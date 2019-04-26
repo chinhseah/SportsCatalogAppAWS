@@ -214,4 +214,6 @@ $ sudo tail -f /var/log/apach2/error.log
 ```
 Check out catalog app at http://35.166.162.17.xip.io
 
+![Catalog App](https://github.com/chinhseah/SportsCatalogAppAWS/blob/master/images/Catalog%20App%20AWS.PNG)
+
 ___resource___: [Deploying a Flask App Using Lightsail on Amazon Web Services](https://alonavarshal.com/blog/flask-on-lightsail-aws/)
